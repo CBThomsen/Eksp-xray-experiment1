@@ -77,7 +77,7 @@ def get_energy_calibration():
 
     for ch in ['ch000', 'ch001', 'ch002']:
         plt.figure()
-        plt.plot(peaks_array[ch], energy, label='Data')
+        plt.plot(peaks_array[ch], energy, 'ro', label='Data')
 
         popt, pcov = curve_fit(lin_func, peaks_array[ch], energy)
         plt.plot(channels, lin_func(channels, *popt), label='Fit')
@@ -92,3 +92,4 @@ def get_energy_calibration():
         print("Calibration result for channel", ch, popt, "error", np.sqrt(np.diag(pcov)))
 
 get_energy_calibration()
+plt.show()
