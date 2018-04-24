@@ -31,7 +31,8 @@ def convert_list_to_hist(path, plot=False):
 
 def find_peaks(path, plot=False):
     ch, counts = convert_list_to_hist(path)
-    indexes = peakutils.indexes(counts, thres=0.6, min_dist=50)
+    counts[ch < 500] = 0
+    indexes = peakutils.indexes(counts, thres=0.18, min_dist=50)
 
     peaks = []
     peaks_error = []
@@ -42,13 +43,13 @@ def find_peaks(path, plot=False):
         plt.plot(ch, counts, label="Data")
 
     for peak_index in indexes:
-        popt, pcov = curve_fit(gauss, ch, counts, bounds = [[0, peak_index-50, 0], [100000, peak_index+50, 50]])
+        popt, pcov = curve_fit(gauss, ch[peak_index - 150:peak_index + 150], counts[peak_index - 150:peak_index + 150], bounds = [[0, peak_index-50, 0], [100000, peak_index+50, 50]])
         if(plot == True):
-            plt.plot(ch, gauss(ch, *popt), label="Gauss fit")
+            plt.plot(ch[peak_index - 150:peak_index + 150], gauss(ch[peak_index - 150:peak_index + 150], *popt), label="Gauss fit")
             plt.legend()
 
-    peaks.append(popt[1])
-    peaks_error.append(np.sqrt(np.diag(pcov))[1])
+        peaks.append(popt[1])
+        peaks_error.append(np.sqrt(np.diag(pcov))[1])
 
     return peaks, peaks_error
 
@@ -56,7 +57,7 @@ def find_all_peaks():
     peaks_array = {'ch000': [], 'ch001':[], 'ch002':[]}
     peaks_error_array = {'ch000': [], 'ch001':[], 'ch002':[]}
 
-    for mat in ['co60', 'na22']:
+    for mat in ['co60', 'na22', 'cs137']:
         for ch in ['ch000', 'ch001', 'ch002']:
             peaks, peaks_error = find_peaks('data_180417/cali_' + mat + '_' + ch + '.txt', False)
 
@@ -68,28 +69,35 @@ def find_all_peaks():
     return peaks_array
 
 def get_energy_calibration():
-    energy = [1500, 800] # co60, na22, cs137
+    energy = [1173.2, 1332.5, 511, 1274.6, 661.7] # co60, na22, cs137
     peaks_array = find_all_peaks()
-    channels = np.linspace(0, 5000, 5000)
+    channels = np.linspace(0, 3000, 3000)
 
-    cal_coeffs = {'ch000': [], 'ch001': [], 'ch002': []}
-    cal_coeffs_err = {'ch000': [], 'ch001': [], 'ch002': []}
+    cal_coeffs = {'ch000': 0, 'ch001': 0, 'ch002': 0}
+    cal_coeffs_err = {'ch000': 0, 'ch001': 0, 'ch002': 0}
 
     for ch in ['ch000', 'ch001', 'ch002']:
         plt.figure()
-        plt.plot(peaks_array[ch], energy, 'ro', label='Data')
 
         popt, pcov = curve_fit(lin_func, peaks_array[ch], energy)
-        plt.plot(channels, lin_func(channels, *popt), label='Fit')
+        plt.plot(channels, lin_func(channels, *popt), 'b-', label='Fit')
+        plt.plot(peaks_array[ch], energy, 'rx', label='Data')
 
-        plt.title('Energy calibration for channel' + ch)
+        plt.title('Energy calibration for channel ' + ch)
         plt.xlabel('Channel')
         plt.ylabel('Energy [keV]')
         plt.legend()
 
-        cal_coeffs[ch].append(popt)
-        cal_coeffs_err[ch].append(np.sqrt(np.diag(pcov)))
-        print("Calibration result for channel", ch, popt, "error", np.sqrt(np.diag(pcov)))
+        plt.savefig('figurer/Energy calibration for channel ' + ch + '.pdf')
 
-get_energy_calibration()
-plt.show()
+        cal_coeffs[ch] = popt
+        cal_coeffs_err[ch] = np.sqrt(np.diag(pcov))
+
+    return cal_coeffs, cal_coeffs_err
+
+if __name__ == "__main__":
+    cal_coeffs, cal_coeffs_err = get_energy_calibration()
+    for ch in ['ch000', 'ch001', 'ch002']:
+        print("Calibration result for channel", ch,":", cal_coeffs[ch], "error", cal_coeffs_err[ch])
+
+    plt.show()
