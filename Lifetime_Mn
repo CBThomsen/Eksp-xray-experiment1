@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May  2 11:15:54 2018
+
+@author: lasse
+"""
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.optimize as sp
+path = '/home/lasse/Documents/mn56_14400_ch000.txt'
+data = np.array(pd.read_csv(path, sep=' ', skiprows=5)) #Indlæs datafilen
+
+#Første søjle er tid i 10⁻8 sekunder
+# anden søjle er counts
+dummy   = np.shape(data)
+dum1    = np.zeros(dummy[0])
+
+sum1 = data[0,0] 
+j= 0
+counts_pr_sec = np.array([])
+#for i in np.arange(dummy[0]):
+for i in np.arange(100000): #1e5 kan køres relativt hurtigt. Meget mere, og så tager scriptet meget lang tid at køre
+    sum1 += data[i+1,0] #Sum tiden op
+    if sum1>=10e9: #Når tiden summet op giver 1 sekund, lægges alle counts dertil sammen
+        a = sum(data[j:i,1]) #Vi summer fra j til i
+        counts_pr_sec = np.append(counts_pr_sec,a) #Lægger oveni array
+        sum1 = 0 #Starter forfra på tidstælling
+        j = i #Omdefinerer j, så vi ikke tæller de samme to gange
+print(counts_pr_sec)
+
+x = np.linspace(0,np.size(counts_pr_sec),63988) 
+#De 96302 passer når man kører for-løkken til 1e5
+
+def navn(x,A,lam):
+    return A*np.exp(-lam*x)
+    
+
+dum1,dum2 = sp.curve_fit(navn,x,counts_pr_sec,bounds=([0,0],[10000,0.4]))
+
+nydum2 = np.sqrt(np.diag(dum2))
+sigma_A = nydum2[0]
+sigma_lam = nydum2[1]
+
+
+plt.figure()
+plt.plot(x,counts_pr_sec) 
+plt.plot(x,navn(x,*dum1))
+plt.yscale('log')
+plt.show()
+
+
