@@ -26,6 +26,8 @@ def convert_list_to_hist(path, plot=False):
         plt.figure()
         plt.title(path)
         plt.plot(ch, counts, label="Data")
+        plt.xlabel('Channels')
+        plt.ylabel('Counts')
 
     return ch, counts
 
@@ -41,6 +43,8 @@ def find_peaks(path, plot=False):
         plt.figure()
         plt.title(path)
         plt.plot(ch, counts, label="Data")
+        plt.xlabel('Channels')
+        plt.ylabel('Counts')
 
     for peak_index in indexes:
         popt, pcov = curve_fit(gauss, ch[peak_index - 150:peak_index + 150], counts[peak_index - 150:peak_index + 150], bounds = [[0, peak_index-50, 0], [100000, peak_index+50, 50]])
@@ -59,7 +63,7 @@ def find_all_peaks():
 
     for mat in ['co60', 'na22', 'cs137']:
         for ch in ['ch000', 'ch001', 'ch002']:
-            peaks, peaks_error = find_peaks('data_180417/cali_' + mat + '_' + ch + '.txt', False)
+            peaks, peaks_error = find_peaks('data_180417/cali_' + mat + '_' + ch + '.txt', True)
 
             for p in peaks:
                 peaks_array[ch].append(p)
@@ -83,12 +87,12 @@ def get_energy_calibration():
         plt.plot(channels, lin_func(channels, *popt), 'b-', label='Fit')
         plt.plot(peaks_array[ch], energy, 'rx', label='Data')
 
-        plt.title('Energy calibration for channel ' + ch)
+        plt.title('Energy calibration for detector ' + str(int(ch[4])+1))
         plt.xlabel('Channel')
         plt.ylabel('Energy [keV]')
         plt.legend()
 
-        plt.savefig('figurer/Energy calibration for channel ' + ch + '.pdf')
+        plt.savefig('figurer/Energy calibration for detector ' + str(int(ch[4])+1) + '.pdf')
 
         cal_coeffs[ch] = popt
         cal_coeffs_err[ch] = np.sqrt(np.diag(pcov))
