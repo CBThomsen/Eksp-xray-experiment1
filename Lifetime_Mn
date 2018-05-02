@@ -20,33 +20,31 @@ dum1    = np.zeros(dummy[0])
 sum1 = data[0,0] 
 j= 0
 counts_pr_sec = np.array([])
-#for i in np.arange(dummy[0]):
-for i in np.arange(100000): #1e5 kan køres relativt hurtigt. Meget mere, og så tager scriptet meget lang tid at køre
-    sum1 += data[i+1,0] #Sum tiden op
-    if sum1>=10e9: #Når tiden summet op giver 1 sekund, lægges alle counts dertil sammen
+b = 10e8
+#for i in np.arange(100000): #1e5 kan køres relativt hurtigt. Meget mere, og så tager scriptet meget lang tid at køre
+for i in np.arange(dummy[0]):
+    if data[i,0]>=b: #Når tiden summet op giver 1 sekund, lægges alle counts dertil sammen
+        b = b+10e8
         a = sum(data[j:i,1]) #Vi summer fra j til i
         counts_pr_sec = np.append(counts_pr_sec,a) #Lægger oveni array
-        sum1 = 0 #Starter forfra på tidstælling
         j = i #Omdefinerer j, så vi ikke tæller de samme to gange
-print(counts_pr_sec)
-
-x = np.linspace(0,np.size(counts_pr_sec),63988) 
-#De 96302 passer når man kører for-løkken til 1e5
+tid = np.linspace(0,np.size(counts_pr_sec),1492) 
+#De 1492 passer når man kører for-løkken til alle indgange
 
 def navn(x,A,lam):
     return A*np.exp(-lam*x)
     
 
-dum1,dum2 = sp.curve_fit(navn,x,counts_pr_sec,bounds=([0,0],[10000,0.4]))
+popt,pcov = sp.curve_fit(navn,tid,counts_pr_sec,bounds=([0,0],[1e9,0.4]))
 
-nydum2 = np.sqrt(np.diag(dum2))
+nydum2 = np.sqrt(np.diag(pcov))
 sigma_A = nydum2[0]
 sigma_lam = nydum2[1]
-
+print('A =', popt[0],'   ','lambda =', popt[1])
 
 plt.figure()
-plt.plot(x,counts_pr_sec) 
-plt.plot(x,navn(x,*dum1))
+plt.plot(tid,counts_pr_sec) 
+plt.plot(tid,navn(tid,*popt))
 plt.yscale('log')
 plt.show()
 
