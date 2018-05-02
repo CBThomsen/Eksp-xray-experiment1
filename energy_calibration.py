@@ -63,7 +63,7 @@ def find_all_peaks():
 
     for mat in ['co60', 'na22', 'cs137']:
         for ch in ['ch000', 'ch001', 'ch002']:
-            peaks, peaks_error = find_peaks('data_180417/cali_' + mat + '_' + ch + '.txt', True)
+            peaks, peaks_error = find_peaks('data_180417/cali_' + mat + '_' + ch + '.txt', False)
 
             for p in peaks:
                 peaks_array[ch].append(p)
