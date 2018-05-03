@@ -80,39 +80,53 @@ def fractionToTotal(a, sigma):
     # Bq
     theo_activities = np.array([0.0743, 0.193, 0.376, 0.461, 0.0494, 0.0303, 0.151, 0.0579, 0.154])*0.9998*total_activity
     
+    theo_activity_errors = 0.01*theo_activities
+    
+    activity_errors = []
+    
     activities = []
     for i in range(1,4):
         activities.append(np.sqrt(2)*a[i]*abs(sigma[i])*np.sqrt(np.pi)/1800)
+        activity_errors.append(np.sqrt(np.sqrt(2)*a[i]*abs(sigma[i])*np.sqrt(np.pi)/1800))
     for i in range(5,11):
         activities.append(np.sqrt(2)*a[i]*abs(sigma[i])*np.sqrt(np.pi)/1800)
-        
+        activity_errors.append(np.sqrt(np.sqrt(2)*a[i]*abs(sigma[i])*np.sqrt(np.pi)/1800))
+    
+    efficiency_errors = []    
     efficiencies = []
+    
     for i in range(0,9):
         efficiencies.append(activities[i]/theo_activities[i])
+        efficiency_errors.append(np.sqrt((1/theo_activities[i]*activity_errors[i])**2+(activities[i]/(theo_activities[i]**2))**2*theo_activity_errors[i]**2))
+        
     
     
-    return efficiencies
+    
+    
+    return efficiencies, efficiency_errors
     
     
     
 
 
-ch_ra, counts_ra_mes, popt, pcov = fitGauss('../Eksp1_HUGE_data/ra226_3600_ch000.txt', plot=True)
-ch_bg, counts_bg, popt_bg, pcov_bg = fitGauss('data_180417/cali_baggrund_live_1800_ch000.txt', plot=True)
+ch_ra, counts_ra_mes, popt, pcov = fitGauss('../Eksp1_HUGE_data/ra226_3600_ch000.txt')
+ch_bg, counts_bg, popt_bg, pcov_bg = fitGauss('data_180417/cali_baggrund_live_1800_ch000.txt')
 
 counts_ra = counts_ra_mes * popt_bg[0]/popt[0] - counts_bg
 
 plt.figure()
 plt.plot(ch_ra, counts_ra)
 
-peaks, peaks_error, sigma, a = find_peaks(ch_ra, counts_ra, plot=True)
+peaks, peaks_error, sigma, a = find_peaks(ch_ra, counts_ra)
 peaks = np.array(peaks)
+peaks_error = np.array(peaks_error)
 
 cal_coeffs, cal_coeffs_error = get_energy_calibration()
 
 energy_peaks = cal_coeffs['ch000'][0]*peaks+cal_coeffs['ch000'][0]
+energy_errors = cal_coeffs['ch000'][0]*peaks_error+cal_coeffs['ch000'][0]
 
-efficiencies = fractionToTotal(a, sigma)
+efficiencies, efficiency_errors = fractionToTotal(a, sigma)
 
 energy_peaks_ny = []
 for i in energy_peaks[1:4]:
