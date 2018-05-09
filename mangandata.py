@@ -53,32 +53,52 @@ plt.plot(fitpar, ec.gauss(fitpar, *threezero), '--')
 plt.plot(fitpar, ec.gauss(fitpar, *fourzero), '--')
 #plt.plot(fitpar, ec.gauss(fitpar, *sixzero), '--')
 
-# Calculate brancing ratios DET ER FORKERT
-total   = onezero[0]+threeone[0]+fourone[0]+sixone[0]+threezero[0]+fourzero[0]
-totals  = np.sqrt(np.diag(onezero0))[0]+np.sqrt(np.diag(threeone0))[0]+np.sqrt(np.diag(fourone0))[0]+np.sqrt(np.diag(sixone0))[0]+np.sqrt(np.diag(threezero0))[0]+np.sqrt(np.diag(fourzero0))[0]
-seven   = 0
-sevens  = 0
-six     = 100*sixone[0]/total
-sixs    = np.sqrt(100**2*np.diag(sixone0)[0]**2/total**2 + 100**2*sixone[0]**2*totals**2/totals**4)
-five    = 0
-fives   = 0
-four    = 100*(fourone[0]+fourzero[0])/total
-fours   = np.sqrt(100**2*np.diag(fourone0)[0]**2/total**2 + 100**2*np.diag(fourzero0)[0]**2/total**2 + 100**2*totals**2*(np.diag(fourone0)[0]+np.diag(fourzero0)[0])**2/total**4)
-three   = 100*(threeone[0]+threezero[0])/total
-threes  = np.sqrt(100**2*np.diag(threeone0)[0]**2/total**2 + 100**2*np.diag(threezero0)[0]**2/total**2 + 100**2*totals**2*(np.diag(threeone0)[0]+np.diag(threezero0)[0])**2/total**4)
-two     = 0
-twos    = 0
-one     = 100*(onezero[0]-(sixone[0]+fourone[0]+threeone[0]))/total
-ones    = np.sqrt(np.diag(onezero0))[0]+np.sqrt(np.diag(sixone0))[0]+np.sqrt(np.diag(fourone0))[0]+np.sqrt(np.diag(threeone0))[0]
+# Calculate brancing ratios
+seven1  = 0
+sevens1 = 0
+six1    = sixone[0]
+sixs1   = np.sqrt(np.diag(sixone0))[0]
+five1   = 0
+fives1  = 0
+four1   = fourone[0] + fourzero[0]
+fours1  = np.sqrt(np.diag(fourone0))[0] + np.sqrt(np.diag(fourzero0))[0]
+three1  = threeone[0] + threezero[0]
+threes1 = np.sqrt(np.diag(threeone0))[0] + np.sqrt(np.diag(threezero0))[0]
+two1    = 0
+twos1   = 0
+one1    = onezero[0] - (sixone[0]+fourone[0]+threeone[0])
+ones1   = np.sqrt(np.diag(onezero0))[0]+np.sqrt(np.diag(sixone0))[0]+np.sqrt(np.diag(fourone0))[0]+np.sqrt(np.diag(threeone0))[0]
+total   = one1 + two1 + three1 + four1 + five1 + six1 + seven1
+totals  = ones1 + twos1 + threes1 + fours1 + fives1 + sixs1 + sevens1
+
+# Calculate percentages
+seven2  = 100*seven1/total
+sevens2 = np.sqrt((100**2/total**2)*sevens1**2 + (100**2*seven1**2/total**4)*totals**2)
+six2    = 100*six1/total
+sixs2   = np.sqrt((100**2/total**2)*sixs1**2 + (100**2*six1**2/total**4)*totals**2)
+five2   = 100*five1/total
+fives2  = np.sqrt((100**2/total**2)*fives1**2 + (100**2*five1**2/total**4)*totals**2)
+four2   = 100*four1/total
+fours2  = np.sqrt((100**2/total**2)*fours1**2 + (100**2*four1**2/total**4)*totals**2)
+three2  = 100*three1/total
+threes2 = np.sqrt((100**2/total**2)*threes1**2 + (100**2*three1**2/total**4)*totals**2)
+two2    = 100*two1/total
+twos2   = np.sqrt((100**2/total**2)*twos1**2 + (100**2*two1**2/total**4)*totals**2)
+one2    = 100*one1/total
+ones2   = np.sqrt((100**2/total**2)*ones1**2 + (100**2*one1**2/total**4)*totals**2)
+
 
 print('Branching ratios:')
-print('First level: ' + str(one) + '+/-' + str(ones) + '%')
-print('Second level: ' + str(two) + '+/-' + str(twos) + '%')
-print('Third level: ' + str(three) + '+/-' + str(threes) + '%')
-print('Fourth level: ' + str(four) + '+/-' + str(fours) + '%')
-print('Fifth level: ' + str(five) + '+/-' + str(fives) + '%')
-print('Sixth level: ' + str(six) + '+/-' + str(sixs) + '%')
-print('Seventh level: ' + str(seven) + '+/-' + str(sevens) + '%')
+print('First level: ' + str(one2) + '+/-' + str(ones2) + '%')
+print('Second level: ' + str(two2) + '+/-' + str(twos2) + '%')
+print('Third level: ' + str(three2) + '+/-' + str(threes2) + '%')
+print('Fourth level: ' + str(four2) + '+/-' + str(fours2) + '%')
+print('Fifth level: ' + str(five2) + '+/-' + str(fives2) + '%')
+print('Sixth level: ' + str(six2) + '+/-' + str(sixs2) + '%')
+print('Seventh level: ' + str(seven2) + '+/-' + str(sevens2) + '%')
 
 # Calculate partial decay rates:
 decay41 = fourone[0]/(fourone[0]+fourzero[0])
+decay40 = fourzero[0]/(fourone[0]+fourzero[0])
+decay31 = threeone[0]/(threeone[0]+threezero[0])
+decay30 = threezero[0]/(threeone[0]+threezero[0])
